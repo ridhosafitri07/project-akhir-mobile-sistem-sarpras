@@ -1,15 +1,28 @@
 // lib/config/api_config.dart
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class ApiConfig {
   // ⚠️ GANTI baseUrl INI SESUAI DENGAN BACKEND ANDA
-  // Contoh: 
-  // - Lokal PC: 'http://127.0.0.1:8000/api/v1'
-  // - Emulator Android: 'http://10.0.2.2:8000/api/v1'
-  // - Real Device (same network): 'http://192.168.43.46:8000/api/v1'
-  static const String baseUrl = 'http://192.168.43.46:8000/api/v1';
-  
+  // Otomatis menggunakan URL yang sesuai dengan platform
+  static String get baseUrl {
+    if (kIsWeb) {
+      // Untuk Web/Chrome, gunakan localhost
+      return 'http://127.0.0.1:8000/api/v1';
+    } else {
+      // Untuk Mobile (Real Device), gunakan IP network
+      return 'http://192.168.43.211:8000/api/v1';
+    }
+  }
+
   // Storage Base URL (untuk menampilkan foto)
-  static const String storageUrl = 'http://192.168.43.46:8000/storage';
+  static String get storageUrl {
+    if (kIsWeb) {
+      return 'http://127.0.0.1:8000/storage';
+    } else {
+      return 'http://192.168.43.211:8000/storage';
+    }
+  }
 
   // Timeout
   static const Duration timeout = Duration(seconds: 30);
@@ -38,7 +51,7 @@ class ApiConfig {
   static String pengaduanByStatus(String status) => '/pengaduan/status/$status';
 
   // ========== HELPER METHODS ==========
-  
+
   /// Get full URL dari endpoint
   static String fullUrl(String endpoint) {
     return '$baseUrl$endpoint';
@@ -47,10 +60,10 @@ class ApiConfig {
   /// Get full storage URL untuk foto
   static String getImageUrl(String? path) {
     if (path == null || path.isEmpty) return '';
-    
+
     // Jika sudah full URL, return as is
     if (path.startsWith('http')) return path;
-    
+
     // Jika path storage
     return '$storageUrl/$path';
   }
@@ -80,6 +93,7 @@ class ApiConfig {
     };
   }
 }
+
 class ApiResponseCode {
   static const int success = 200;
   static const int created = 201;
@@ -98,15 +112,16 @@ class ApiErrorMessages {
   static const String timeout = 'Request timeout, silakan coba lagi';
   static const String serverError = 'Terjadi kesalahan pada server';
   static const String unknownError = 'Terjadi kesalahan tidak diketahui';
-  static const String unauthorized = 'Sesi Anda telah berakhir, silakan login kembali';
+  static const String unauthorized =
+      'Sesi Anda telah berakhir, silakan login kembali';
 }
 
 // ========== STATUS PENGADUAN ==========
 class PengaduanStatus {
-  static const String pending = 'pending';      // Diajukan
-  static const String proses = 'proses';        // Diproses
-  static const String selesai = 'selesai';      // Disetujui/Selesai
-  static const String ditolak = 'ditolak';      // Ditolak
+  static const String pending = 'pending'; // Diajukan
+  static const String proses = 'proses'; // Diproses
+  static const String selesai = 'selesai'; // Disetujui/Selesai
+  static const String ditolak = 'ditolak'; // Ditolak
 
   static String getLabel(String status) {
     switch (status.toLowerCase()) {

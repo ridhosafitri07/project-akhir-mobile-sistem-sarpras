@@ -1,3 +1,5 @@
+import 'item.dart';
+
 class Pengaduan {
   final int idPengaduan;
   final String namaPengaduan;
@@ -37,30 +39,18 @@ class Pengaduan {
       lokasi: json['lokasi'],
       foto: json['foto'],
       status: json['status'],
-      tglPengajuan: DateTime.parse(json['tgl_pengajuan']),
-      tglVerifikasi: json['tgl_verifikasi'] != null ? DateTime.parse(json['tgl_verifikasi']) : null,
-      tglSelesai: json['tgl_selesai'] != null ? DateTime.parse(json['tgl_selesai']) : null,
+      tglPengajuan: DateTime.parse(json['tgl_pengajuan']).toLocal(),
+      tglVerifikasi: json['tgl_verifikasi'] != null
+          ? DateTime.parse(json['tgl_verifikasi']).toLocal()
+          : null,
+      tglSelesai: json['tgl_selesai'] != null
+          ? DateTime.parse(json['tgl_selesai']).toLocal()
+          : null,
       catatanAdmin: json['catatan_admin'],
       saranPetugas: json['saran_petugas'],
       item: json['item'] != null ? Item.fromJson(json['item']) : null,
-      petugas: json['petugas'] != null ? Petugas.fromJson(json['petugas']) : null,
-    );
-  }
-}
-
-class Item {
-  final int idItem;
-  final String namaItem;
-
-  Item({
-    required this.idItem,
-    required this.namaItem,
-  });
-
-  factory Item.fromJson(Map<String, dynamic> json) {
-    return Item(
-      idItem: json['id_item'],
-      namaItem: json['nama_item'],
+      petugas:
+          json['petugas'] != null ? Petugas.fromJson(json['petugas']) : null,
     );
   }
 }

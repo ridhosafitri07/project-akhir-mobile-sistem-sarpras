@@ -1,44 +1,53 @@
-// lib/screens/auth/login_screen.dart
+// lib/screens/auth/register_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../config/theme_config.dart';
 import '../../widgets/custom_widget.dart';
-import 'register_screen.dart';
 import '../main_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _namaController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _telpController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _isLoading = false;
 
   @override
   void dispose() {
+    _namaController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _telpController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
     final authService = Provider.of<AuthService>(context, listen: false);
     
-    final result = await authService.login(
+    final result = await authService.register(
       username: _usernameController.text.trim(),
       password: _passwordController.text,
+      passwordConfirmation: _confirmPasswordController.text,
+      namaPengguna: _namaController.text.trim(),
+      telpUser: _telpController.text.trim().isEmpty ? null : _telpController.text.trim(),
     );
 
     setState(() => _isLoading = false);
@@ -54,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Show error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] ?? 'Login gagal'),
+          content: Text(result['message'] ?? 'Register gagal'),
           backgroundColor: AppTheme.errorColor,
         ),
       );
@@ -90,32 +99,32 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     child: const Icon(
-                      Icons.build_circle,
-                      size: 80,
+                      Icons.person_add,
+                      size: 60,
                       color: AppTheme.primaryColor,
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 24),
 
                   // Title
                   const Text(
-                    'Sipras',
+                    'Daftar Akun',
                     style: TextStyle(
-                      fontSize: 32,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Sistem Pengaduan Sarana & Prasarana',
+                    'Buat akun untuk mulai mengajukan pengaduan',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.white,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
 
                   // Form Card
                   Container(
@@ -136,6 +145,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          // Nama Lengkap Field
+                          CustomTextField(
+                            controller: _namaController,
+                            label: 'Nama Lengkap',
+                            prefixIcon: Icons.badge,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Nama lengkap tidak boleh kosong';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
                           // Username Field
                           CustomTextField(
                             controller: _usernameController,
@@ -145,8 +168,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (value == null || value.isEmpty) {
                                 return 'Username tidak boleh kosong';
                               }
+                              if (value.length < 3) {
+                                return 'Username minimal 3 karakter';
+                              }
                               return null;
                             },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // No Telepon Field
+                          CustomTextField(
+                            controller: _telpController,
+                            label: 'No. Telepon (Opsional)',
+                            prefixIcon: Icons.phone,
+                            keyboardType: TextInputType.phone,
                           ),
                           const SizedBox(height: 16),
 
@@ -172,36 +207,65 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (value == null || value.isEmpty) {
                                 return 'Password tidak boleh kosong';
                               }
+                              if (value.length < 6) {
+                                return 'Password minimal 6 karakter';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Confirm Password Field
+                          CustomTextField(
+                            controller: _confirmPasswordController,
+                            label: 'Konfirmasi Password',
+                            prefixIcon: Icons.lock_outline,
+                            obscureText: _obscureConfirmPassword,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureConfirmPassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureConfirmPassword = !_obscureConfirmPassword;
+                                });
+                              },
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Konfirmasi password tidak boleh kosong';
+                              }
+                              if (value != _passwordController.text) {
+                                return 'Password tidak cocok';
+                              }
                               return null;
                             },
                           ),
                           const SizedBox(height: 24),
 
-                          // Login Button
+                          // Register Button
                           CustomButton(
-                            text: 'Masuk',
-                            onPressed: _handleLogin,
+                            text: 'Daftar',
+                            onPressed: _handleRegister,
                             isLoading: _isLoading,
                           ),
                           const SizedBox(height: 16),
 
-                          // Register Link
+                          // Login Link
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Text(
-                                'Belum punya akun? ',
+                                'Sudah punya akun? ',
                                 style: TextStyle(color: AppTheme.textSecondaryColor),
                               ),
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => const RegisterScreen(),
-                                    ),
-                                  );
+                                  Navigator.of(context).pop();
                                 },
-                                child: const Text('Daftar'),
+                                child: const Text('Masuk'),
                               ),
                             ],
                           ),
